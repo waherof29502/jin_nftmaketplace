@@ -1,5 +1,5 @@
 import { Banner, CreatorCard, NFTCard } from '../components';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import images from '../assets';
