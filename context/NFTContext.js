@@ -14,8 +14,8 @@ const fetchContract = (signerOrProvider) =>
 export const NFTContext = React.createContext();
 
 export const NFTProvider = ({ children }) => {
-  const [currentAccount, setCurrentAccount] = useState('');
   const nftCurrency = 'ETH';
+  const [currentAccount, setCurrentAccount] = useState('');
 
   const checkIfWalletIsConnected = async () => {
     if (!window.ethereum) return alert('Please install MetaMask');
@@ -63,45 +63,80 @@ export const NFTProvider = ({ children }) => {
 
     try {
       const added = await client.add(data);
+
       const url = `https://ipfs.infura.io/ipfs/${added.path}`;
 
       await createSale(url, price);
+
       router.push('/');
     } catch (error) {
+      console.log(error);
       console.log('Error uploading to IPFS.');
     }
-    const createSale = async (url, formInputPrice, isReselling, id) => {
-      const web3Modal = new Web3Modal();
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const signer = provider.getSigner();
-
-      //0.025 -> wei
-      const price = ethers.utils.parseUnits(formInputPrice, 'ether');
-      const contract = fetchContract(signer);
-      const listingPrice = await contract.getListingPrice();
-
-      const transaction = await contract.createToken(url, price, {
-        value: listingPrice.toString(),
-      });
-
-      await transaction.wait();
-
-      console.log(contract);
-    };
-
-    return (
-      <NFTContext.Provider
-        value={{
-          nftCurrency,
-          connectWallet,
-          currentAccount,
-          uploadToIPFS,
-          createNFT,
-        }}
-      >
-        {children}
-      </NFTContext.Provider>
-    );
   };
+  const createSale = async (url, formInputPrice, isReselling, id) => {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+
+    //0.025 -> wei
+    const price = ethers.utils.parseUnits(formInputPrice, 'ether');
+    const contract = fetchContract(signer);
+    const listingPrice = await contract.getListingPrice();
+
+    const transaction = await contract.createToken(url, price, {
+      value: listingPrice.toString(),
+    });
+
+    await transaction.wait();
+
+    // console.log(contract);
+  };
+
+  const fetchNFTs = async () => {
+    const provider = new ethers.providers.JsonRpcProvider();
+    const contract = fetchContract(provider);
+
+    const data = await contract.fetchMarketItems();
+    const items = await Promise.all(
+      data.map(async ({ tokenId, seller, owner, price: unformattedPrice }) => {
+        const tokenURI = await contract.tokenURI(tokenId);
+        const {
+          data: { image, name, description },
+        } = await axios.get(tokenURI);
+        const price = ethers.utils.formatUnits(
+          unformattedPrice.toString(),
+          'ether'
+        );
+
+        return {
+          price,
+          tokenId: tokenId.toNumber(),
+          seller,
+          owner,
+          image,
+          name,
+          description,
+          tokenURI,
+        };
+      })
+    );
+    return items;
+  };
+
+  return (
+    <NFTContext.Provider
+      value={{
+        nftCurrency,
+        connectWallet,
+        currentAccount,
+        uploadToIPFS,
+        createNFT,
+        fetchNFTs,
+      }}
+    >
+      {children}
+    </NFTContext.Provider>
+  );
 };
