@@ -56,6 +56,7 @@ const ButtonGroup = ({ setActive, router }) => {
     <Button
       btnName='Create'
       classStyles='mx-2 rounded-xl'
+      btnType='primary'
       handleClick={() => {
         setActive('');
         router.push('/create-nft');
@@ -64,6 +65,7 @@ const ButtonGroup = ({ setActive, router }) => {
   ) : (
     <Button
       btnName='Connect'
+      btnType='primary'
       classStyles='mx-2 rounded-xl'
       handleClick={connectWallet}
     />
