@@ -65,7 +65,7 @@ const MyNFTs = () => {
 
           <div className='mt-3 w-full flex flex-wrap '>
             {nfts.map((nft) => (
-              <NFTCard key={nft.token} nft={nft} />
+              <NFTCard key={nft.token} nft={nft} onProfilePage />
             ))}
           </div>
         </div>
