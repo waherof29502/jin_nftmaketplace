@@ -70,7 +70,7 @@ const CreateNFT = () => {
                     height={100}
                     objectFit='contain'
                     alt='file upload'
-                    className={theme === 'light' && 'filter invert'}
+                    className={theme === 'light' ? 'filter invert' : ''}
                   />
                 </div>
 
