@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 import { NFTContext } from '../context/NFTContext';
-import { Loader, NFTCard, Button, Modal } from '../components';
+import { Loader, NFTCard, Button, Modal, Loader } from '../components';
 
 import images from '../assets';
 import { shortenAddress } from '../utils/shortenAddress';
@@ -52,7 +52,8 @@ const PaymentBodyCmp = ({ nft, nftCurrency }) => (
 );
 
 const NFTDetails = () => {
-  const { currentAccount, nftCurrency, buyNFT } = useContext(NFTContext);
+  const { isLoadingNFT, currentAccount, nftCurrency, buyNFT } =
+    useContext(NFTContext);
   const [isLoading, setIsLoading] = useState(true);
   const [nft, setNft] = useState({
     image: '',
@@ -181,6 +182,20 @@ const NFTDetails = () => {
           handleClose={() => setPaymentModal(false)}
         />
       )}
+      {isLoadingNFT && (
+        <Modal
+          header='Buying NFT...'
+          body={
+            <div className='flexCenter flex-col text-center'>
+              <div className='relative w-52 h-52'>
+                <Loader />
+              </div>
+            </div>
+          }
+          handleClose={() => setPaymentModal(false)}
+        />
+      )}
+
       {successModal && (
         <Modal
           header='Payment Successful'
